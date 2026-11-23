@@ -1,4 +1,6 @@
-# 从零到网页：实现流程与证据等级
+# 实现流程速览与证据等级
+
+完整从零教程现在位于 [FROM_ZERO.md](FROM_ZERO.md)，具体token/汇编检索位于 [EVIDENCE_WALKTHROUGH.md](EVIDENCE_WALKTHROUGH.md)。本篇保留架构速览，不代替主教程。
 
 本文件回答“这套雷达是怎么一步步做出来的”，并明确哪些步骤有静态/流量证据，哪些只是工程选择。
 

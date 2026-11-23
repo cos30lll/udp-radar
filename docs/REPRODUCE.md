@@ -1,5 +1,7 @@
 # 可复现指南
 
+本文是命令与环境手册。要复做从未知流量到成品的开发过程，先按 [FROM_ZERO.md](FROM_ZERO.md) 的17阶段阅读，再用 [EVIDENCE_WALKTHROUGH.md](EVIDENCE_WALKTHROUGH.md) 查具体代码证据。
+
 命令从仓库根目录执行。先区分三个环境：电脑负责检查/暂存/Git；手机 Operit Ubuntu 负责 Python/libzstd 和可见共享文件操作；手机 Android 原生 Root shell 负责系统命令检查与用户主动启动采集。proot 的 uid 0 不等于 Android 真 Root。
 
 ## 0. 输入与依赖
@@ -100,6 +102,7 @@ python3 tools/replay_pcap.py /path/to/baseline.pcap --ports 45063,45283 --expect
 CSV 字段：packet,category,entity_field1,entity_field2,scale,raw_x,raw_y,raw_z,frame_field4,frame_field5,timestamp,x,y,z。历史固定样本 8184 包、7101 条坐标逐条 raw/XYZ/顺序/时间戳一致；未提供公开流量，因此读者不能无输入重做私人样本验收。
 
 退出码：
+
 - 0：观察到事件，没有已记录的应用错误或已知未处理指标；不是网络完整性保证。
 - 2：参数/输入结构/解码/CSV 对照出错，检查 status、input_error、last_error。
 - 3：无目标事件，或存在未支持流量、截短捕获、未完成/丢弃传输分片，查看 status、stats、unhandled_indicators。
@@ -133,6 +136,7 @@ python3 research/disassemble_native.py --so /path/to/libjelib.so --output work/n
 预期提取 TextAsset 与 asset-manifest.json，index 生成 candidate-index.json/type-index.tsv；IL 目录生成所选 token 的文本，native 目录含匹配符号的汇编和 manifest。必须检查输出非空，token 只适用于固定程序集。提取和原生反汇编会记录输入哈希，但**不会强制限定固定哈希**，需要使用者主动核对。
 
 固定输入识别值：
+
 - UpdateScript_500.dll：1ce1e36603c3c481a03a321edc1d08f6ba24f165855021b808effbb90d84a5ec
 - libjelib.so：a6e64e050d3ac896bb5310e3bcfc80f8d724188b6db1955e216bb868641526f6
 - 热更新 bundle：63a76b500939a3b3e99233975abee294e31586cd6c33aaabd090193d3239eb11
@@ -141,10 +145,26 @@ python3 research/disassemble_native.py --so /path/to/libjelib.so --output work/n
 
 ```bash
 python3 research/restore_inputs.py metadata --input /path/to/global-metadata.dat --output work/metadata-restored
-python3 research/restore_inputs.py il2cpp --input /path/to/libil2cpp.so --output work/il2cpp-restored
+python3 research/restore_inputs.py il2cpp --input /path/to/libil2cpp.so --metadata-report work/metadata-restored/restore-report.json --output work/il2cpp-restored
 ```
 
 只有恢复入口强制校验已知输入 SHA256，不匹配即拒绝；结果是离线分析副本，不是可安装/运行游戏库。详细方法证据见 PROTOCOL.md；额外 HP 字段用途仍须回到固定 IL 复核。
+
+## E2. 从原始 PCAP 到字段的研究入口
+
+先由 PID/ss 明确本地业务端口；以下历史主端口45283仅作例子，必须替换成你自己的已确认值。其他端口可能是不同辅助通道，不要把全部流强套同一个传输外壳。
+
+```bash
+python3 research/pcap_lab.py survey /path/to/round.pcap --ports 45283 --direction both --summary work/survey.json
+python3 research/pcap_lab.py extract /path/to/round.pcap --ports 45283 --direction in --message 3/852 --output work/scene.app
+python3 research/pcap_lab.py fields work/scene.app --output work/scene-fields.json
+python3 research/pcap_lab.py fields work/scene.app --path 6:1 --output work/entity-fields.json
+python3 research/pcap_lab.py fields work/scene.app --path 6:1/4:1 --output work/action-fields.json
+```
+
+extract 输出完整四字节应用头加body；fields 默认offset4，path按field:occurrence逐层进入明确的length-delimited子块。不是每帧都有实体/动作，缺字段时选择实际存在的消息或occurrence。无schema检查不等于业务意义确认，必须与IL消费者交叉核对。输出全是私人材料。
+
+该工具复用固定版本传输实现，不自动推导未知游戏协议；0表示观测到应用且未记录已知问题，2表示错误，3表示部分/无匹配，不是通用网络完整性证明。3/50历史body解码另见legacy_move50.py，它不接受原始PCAP。
 
 ## F. 发布
 

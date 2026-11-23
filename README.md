@@ -2,7 +2,16 @@
 
 从本机 UDP 流量还原固定版本的实体坐标、动作 31 HP 原值、协议姓名/UID，并按协议标记本机身份。只读网页监听 `127.0.0.1:8765`；不注入、不改游戏内存、不主动发包、不操作角色。
 
-运行代码：`v2.2-names-candidate`。发布工具/文档修订：`release-r1`，2026-11-23。九个 `src/` 与 `dist/udp-radar-v2.2/` 运行文件保留原机已验证字节，未因发布修复重新验收游戏。用户原机曾反馈“好了，完美了”；不代表跨设备或所有对局有效。
+运行代码：`v2.2-names-candidate`。发布工具/文档修订：`release-r2`，2026-11-23。九个 `src/` 与 `dist/udp-radar-v2.2/` 运行文件保留原机已验证字节，未因发布修复重新验收游戏。用户原机曾反馈“好了，完美了”；不代表跨设备或所有对局有效。
+
+## 从零实现，请先读这两篇
+
+1. **[从零实现 UDP 雷达](docs/FROM_ZERO.md)**：17 个阶段，从 APK/热更新提取、定位托管/原生收发，到 PID/端口与 PCAP、传输恢复、3/50→3/852 的真实转折、坐标/身份/HP 取证、状态机、持续采集、HTTP/Canvas 与诊断验收。
+2. **[证据检索与阅读](docs/EVIDENCE_WALKTHROUGH.md)**：每个结论该导出哪些 token/函数、看什么指令和字段关系，避免只拿结果常量照抄。
+
+新增 `research/pcap_lab.py` 提供双向应用分布统计、选中消息提取和显式嵌套字段检查；`research/legacy_move50.py` 保留早期静态分支，说明为什么不能套到实际3/852。它们只读本地文件，输出含私人数据，不进入公开包。
+
+部署步骤是后半程，不能替代协议分析。若只想运行现成程序，继续下文与 REPRODUCE；若要复做开发过程，按 FROM_ZERO 的顺序执行并逐步保留证据。
 
 ## 边界先读
 
@@ -89,6 +98,7 @@ python3 tools/replay_pcap.py --help
 
 ## 文档与 Codex 交接
 
+- `docs/FROM_ZERO.md`、`EVIDENCE_WALKTHROUGH.md`：从零开发完整主线与代码证据检索。
 - `docs/REPRODUCE.md`：环境分层、部署/解析/研究命令、预期结果与排错。
 - `docs/PIPELINE.md`、`PROTOCOL.md`、`ARCHITECTURE.md`：实现流程、固定版本证据与资源上限。
 - `docs/VALIDATION.md`、`KNOWN_LIMITATIONS.md`：原机反馈、历史离线统计、未验证边界。

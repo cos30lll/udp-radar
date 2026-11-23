@@ -1,6 +1,6 @@
 # AGENTS.md
 
-运行版本 v2.2-names-candidate；发布工具/文档修订 release-r1。先读 README、docs、SOURCE_ORIGIN.json。
+运行版本 v2.2-names-candidate；发布工具/文档修订 release-r2。先读 README、docs/FROM_ZERO.md、docs/EVIDENCE_WALKTHROUGH.md、其余 docs 与 SOURCE_ORIGIN.json。
 
 ## 硬性边界
 

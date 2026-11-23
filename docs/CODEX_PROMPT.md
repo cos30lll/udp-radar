@@ -3,7 +3,7 @@
 解压后打开仓库，复制以下内容：
 
 ---
-请先阅读 AGENTS.md、README.md、docs、SOURCE_ORIGIN.json。运行代码是 v2.2-names-candidate，发布工具/文档修订 release-r1。
+请先阅读 AGENTS.md、README.md、docs/FROM_ZERO.md、docs/EVIDENCE_WALKTHROUGH.md、其余 docs、SOURCE_ORIGIN.json。运行代码是 v2.2-names-candidate，发布工具/文档修订 release-r2。
 
 先只读审计，不创建远程、不推送、不启动游戏/抓包/后端、不部署手机、不截图或读取 UI 层级：
 1. 运行 `python3 tools/build_dist.py --check` 与 `python3 tools/publish_check.py .`，记录实际结果。不在干净树运行 compileall 生成缓存。

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>UDP 雷达 · v2.2 候选</title>
+<link rel="stylesheet" href="/style.css">
+<script defer src="/app.js"></script>
+</head>
+<body>
+<header><div><h1>UDP 坐标雷达 <small>v2.2 候选 · 持续收包 / 诊断</small></h1><p id="status">正在连接本机后端…</p></div><span id="health" class="badge">未连接</span></header>
+<main>
+<section class="controls">
+<label>投影<select id="plane"><option value="xz">X / Z · 俯视</option><option value="xy">X / Y</option><option value="zy">Z / Y</option></select></label>
+<label>参考实体<select id="anchor"><option value="">无（世界坐标）</option></select></label>
+<label>类别<select id="category"><option value="4">Actor（按协议关联身份）</option><option value="all">所有已解析类别</option></select></label>
+<label>显示跨度<input id="span" type="number" min="5" max="100000" step="10" value="160"></label>
+<label class="check"><input id="autoSelf" type="checkbox" checked>自动选择自己</label>
+<label class="check"><input id="follow" type="checkbox" checked>跟随参考实体</label>
+<label class="check"><input id="tracks" type="checkbox" checked>轨迹</label>
+<label class="check"><input id="labels" type="checkbox" checked>编号</label>
+<label class="check"><input id="flip" type="checkbox">翻转纵轴</label>
+<button id="fit">适配当前坐标</button><button id="freeze">暂停画面</button>
+</section>
+<div class="workspace"><section class="plot"><canvas id="radar"></canvas><div id="plotinfo">等待实际坐标，不生成示例点</div></section>
+<aside><h2>运行状态</h2><dl id="metrics"></dl><p id="error"></p><h2>校准提示</h2><p>默认 X/Z 平面，Y 为高度。收到进场初始化后，按实体编号关联姓名、UID 并标记自己；默认自动选择自己。手选参考不会改变身份，不判断敌我。</p><p>3 秒未更新变灰，30 秒未更新从图上隐藏。参考实体失联会提示，不以历史位置冒充实时位置。</p><p>无地图底图、无朝向补偿、无插值预测。图上距离为游戏世界单位，尚未独立校准为米。</p></aside></div>
+<section class="tablebox"><h2>实体明细 <small>可点选行作为参考</small></h2><table><thead><tr><th>参考</th><th>类别</th><th>字段1</th><th>字段2</th><th>姓名</th><th>UID</th><th>血量原值</th><th>HP更新前</th><th>本地身份</th><th>X</th><th>Y</th><th>Z</th><th>ΔY</th><th>平面距离</th><th>更新前</th></tr></thead><tbody id="rows"></tbody></table></section>
+<footer id="warning">解析 3/852 坐标、HP=31 原值及进场姓名/UID；未收到的数据不猜填。请在进场前启动；限时缓存全机UDP，只解析已确认游戏端口。新增功能实机待验收，最大血量未确认。关闭网页不会停止后端，请用停止脚本结束。</footer>
+</main>
+</body>
+</html>

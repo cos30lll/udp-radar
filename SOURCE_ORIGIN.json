@@ -1,0 +1,22 @@
+{
+  "version": "v2.2-names-candidate",
+  "runtime_files_sha256": {
+    "protocol.py": "07688828b82368326eecad367d9806b1945c6412793064868f2a9ff258b73bd5",
+    "identity.py": "623e0afb1fb9081dbbcda71bae79ad97eba147cb98317851d2da98d1589343eb",
+    "server.py": "49b02376cc49ef2602c521bf7a68f234676b4acf0150fb74a0fe03b29166d6a5",
+    "app.js": "1310772f138176c3e45d94f434c093dfb5a381131513c8f28f585f2d19249499",
+    "index.html": "6c38d0e3ff8cf9da0f97876290254fcf664228e03a734b7063b05ede0cbc5b56",
+    "style.css": "8c747790a065097093b0ba7fd44406a42d07e5a3ebd69f62ff7db09d5f4b5841",
+    "runner.sh": "1bf37a352451839a3f2891f87696a9dd5f70ef47f5a6d8b14220b4272616fda7",
+    "启动.sh": "7256b6ba398d3765dea14ae5558dc29e58c1f7a21f2caec35b819ab1d4725ced",
+    "停止.sh": "e98b2cea28992a65a462389d8ae7fa1f635f36867d32291dc5574bbeac99f2ed"
+  },
+  "source_equals_original_tested_runtime": true,
+  "original_runtime_changed": false,
+  "user_acceptance": {
+    "date": "2026-11-23",
+    "kind": "user_report",
+    "statement": "用户在v2.2姓名修复后反馈好了，完美了。",
+    "independent_new_live_run_by_packager": false
+  }
+}

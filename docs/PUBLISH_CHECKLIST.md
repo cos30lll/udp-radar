@@ -1,22 +1,30 @@
-# 发布检查清单
+# 发布检查
 
 ## 发布目录
 
-1. `python3 tools/build_dist.py --check`：Python 语法与九个 src/dist 文件一致，不创建缓存。
-2. `python3 tools/publish_check.py .`：本地发布树、文件哈希、SOURCE_ORIGIN 与有限隐私规则通过。任何警告需理解，OK 不等于全面审查。
-3. 禁止 PCAP/CSV/JSONL/日志/游戏二进制/密钥/.env/未知文件，build/work/bin/obj/__pycache__ 等生成目录也不能打入包。工具会拒绝；先移出正式发布树，不靠 .gitignore 掩盖。
-4. 清单不包含自身哈希；任何获授权的文档/工具修改都要刷新 FILES_SHA256.json。不得修改原运行哈希来掩盖运行文件变化。
-5. 重新打包必须使用明确 UTF-8 名称的 ZIP。外层目录名保持 udp-radar-open-source-v2.2；四个中文脚本名可直接按预期路径读取，无需转码。
-6. `python3 tools/publish_check.py . --archive /path/to/udp-radar-open-source-v2.2.zip` 检查 ZIP 名称、安全路径与内容一致性；ZIP 存放在仓库外。
+```bash
+python3 tools/build_dist.py --check
+python3 tools/publish_check.py .
+```
 
-## 人工及电脑端
+第一条命令检查 Python 语法，并核对 `src/` 和 `dist/` 的九个运行文件。第二条核对文件清单、原版运行文件的哈希和常见隐私问题。两个检查都不生成 Python 缓存。
 
-- 人工复核公开文档没有玩家信息、服务器地址、会话路径、真实 token 或设备私人用户名；标准公共项目路径有意保留，不要声称没有任何绝对路径。
-- 对 Git 执行 `git status --short`、`git ls-files`、`git diff --cached --stat`、`git diff --cached`，并独立审查已有历史。目录检查器不审查 Git 历史；敏感文件即使当前已删也可能留在历史中。
-- 确认许可证 MIT 方案和署名、目标 owner/name、public/private、保留 dist 与项目路径的选择；授权公开代码不等于授权公开流量。
-- 不将游戏用户反馈、文件一致性、退出码或本机暂存冒充跨设备实测。电脑端 .NET SDK 构建和手机实际运行仍各需真实验收。
-- 不索取、保存、回显 GitHub token，不擅自 force push、改写历史或开 Pages/Release。
+修改文档或工具后，更新 `FILES_SHA256.json` 里对应的条目。清单省略自身的哈希，原版运行文件的校验值记在 `SOURCE_ORIGIN.json`。
 
-## 授权后的本地 Git 准备
+把私有输入和生成文件移出发布目录，包括 PCAP、CSV、JSONL、日志、游戏二进制、密钥、`.env` 以及 `build/`、`work/`、`bin/`、`obj/`、`__pycache__/`。发布检查也会拒绝未知文件类型和这些目录里的 Git 忽略文件。
 
-以下只是顺序提示，不由包自动执行。先确认当前目录与是否已有仓库；已有仓库不要盲目重置分支。新仓库可 `git init -b main`，然后暂存、检查、`git commit`。用户名和邮箱由用户本机配置。确认 commit 已存在与远程地址后，才执行用户明确授权的推送。没有 workflow 时不能声称 CI 已通过。
+## 提交前
+
+用 `git status --short`、`git ls-files`、`git diff --cached --stat` 和 `git diff --cached` 核对待发布内容，另查一遍 Git 历史。重点找玩家信息、服务器地址、会话路径、凭据和个人设备路径。文档用到的共享存储路径是部署示例。
+
+核对 MIT 许可证和署名，再确认目标仓库、可见性、`dist/` 和文档中的部署路径。机器上的文件检查、.NET 构建和手机实测应分别记录结果。
+
+新仓库可以用 `git init -b main` 初始化。配置本地提交者姓名和邮箱后，暂存文件并检查差异，再用 `git commit` 提交。推送前核对分支和远程地址。
+
+## ZIP
+
+把压缩包放在仓库目录之外，保留 `udp-radar-open-source-v2.2` 为外层目录，并以 UTF-8 编码文件名。打包后核对四个中文脚本的路径和包内内容。
+
+```bash
+python3 tools/publish_check.py . --archive /path/to/udp-radar-open-source-v2.2.zip
+```

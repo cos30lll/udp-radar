@@ -1,22 +1,14 @@
 # UDP 协议分析的证据索引
 
-托管 token 对应 `UpdateScript_500.dll`，SHA-256 为 `1ce1e36603c3c481a03a321edc1d08f6ba24f165855021b808effbb90d84a5ec`。原生 VA 对应第 6 节列出的 `libjelib.so`。完整操作见实现教程第 3、6、8～10 节。[实现教程](FROM_ZERO.md)
+托管 token 对应 `UpdateScript_500.dll`，原生 VA 对应 `libjelib.so`。输入哈希、提取和回放命令见[实现教程](FROM_ZERO.md)。
 
-## 1. 托管程序集检查工具
+## 托管工具
 
-| 工具/模式 | 输入 | 输出 | 应检查的内容 |
-|---|---|---|---|
-| StaticAssemblyInspect index | 程序集、输出目录 | 类型索引、网络候选、外部调用 | 关键词命中位置及外部调用 |
-| StaticAssemblyInspect types | 程序集、目录、类型全名或0x02类型token | selected-types.json | 字段类型、方法token、是否有方法体 |
-| StaticAssemblyInspect il | 程序集、目录、0x06方法token或完整方法名 | 每方法IL文本 | 真实load/call/store/branch与参数流 |
-| ProtocolEvidenceInspect routes | 程序集、输出文件、command列表 | module3路由 | command/module参数顺序、handler参数类型 |
-| ProtocolEvidenceInspect attrs | 程序集、输出文件、token | 自定义attribute | 路由属性实际构造参数 |
-| ProtocolEvidenceInspect mentions | 程序集、输出文件、类型名片段 | 字段/签名引用 | 按字段和签名缩小搜索范围 |
-| StaticReferenceInspect | 程序集、输出目录、成员token | references.json及调用方IL | IL 指令的操作数是否引用目标 |
+- `StaticAssemblyInspect` 的 `index` 找候选，`types` 列字段和方法，`il` 导出方法体。
+- `ProtocolEvidenceInspect` 的 `routes` 列路由，`attrs` 核对属性参数，`mentions` 搜字段和签名。
+- `StaticReferenceInspect` 在 `references.json` 中列出引用，附上调用方 IL。分派表还需看注册和委托构造。
 
-导出后检查 `types` 的 `selected`、`il` 的 `methods`、`routes` 的 `records` 和引用报告的 `hits`。消息可能由分派表或委托调用，沿注册和委托构造代码也能找到入口。三个工具的 .NET 8 SDK 构建有单独的验证记录。
-
-## 2. 网络入口与早期批量移动分支
+## 网络入口和 3/50
 
 | 问题 | token/类型 | 阅读目标 |
 |---|---|---|
@@ -32,9 +24,7 @@
 | 位置/外推消费 | 0x0601DD55、0x0601DD41 | 第一向量进入位置；第二乘deltaTime后用于外推 |
 | 向量轴序/写入 | 0x06021E2D、0x0601EE66 | Vector3构造次序与编码对应 |
 
-3/50 的结构来自静态分析。实测主会话采用 3/852，雷达的坐标解码以第 3 节的消息结构为准。
-
-## 3. 3/852 的场景、实体和动作
+## 3/852 场景解析
 
 | 层级 | token | 类型/证据点 |
 |---|---|---|
@@ -46,9 +36,9 @@
 | 三值→Vector3 | 0x06021E2E | 依次取array[offset+0/1/2]，scale>0时分别div，否则原浮点 |
 | 向量写入变体 | 0x06021E29 | 同类三分量赋值/缩放逻辑 |
 
-`0x06021E2E` 先执行三遍 `ldelem.i8 → conv.r4 → ldarg scale → div`，再调用 `newobj UnityEngine.Vector3`。`0x06002E55` 从 `FOOBJALACEJ` 取出 `values` 和 `scale` 作为输入。另用真实 PCAP 的原值和 CSV 核对换算结果。
+`0x06021E2E` 按分量执行 `ldelem.i8 → conv.r4 → ldarg scale → div`，再构造 `UnityEngine.Vector3`。
 
-## 4. 名单字段、字典键与本地身份
+## 名单和本地身份
 
 | 目的 | token | 应证明的关系 |
 |---|---|---|
@@ -65,11 +55,9 @@
 | 3/6 handler | 0x06016A5A | 对名单执行新增和移除 |
 | 3/2005 handler | 0x060183A3 | 更新当前观察目标的 UID |
 
-路由属性 `HNMOBHFEEON` 先收 `command`，再收 `module`。例如 3/1 对应的参数依次是 1、3。导出 `routes` 后，用 `attrs` 复核已知 handler 的参数顺序。
+`HNMOBHFEEON` 的参数按 `command`、`module` 排列。3/1 对应 `(1, 3)`，可用 `attrs` 复核。
 
-判断两个字典能否关联，要追清两边的键从哪里来。这里用的是类别 4 的 `id1` 和名单里的运行时实体号。
-
-## 5. HP 原值
+## HP
 
 | 目的 | token | 应读到的事实 |
 |---|---|---|
@@ -77,11 +65,9 @@
 | 玩家HP处理 | 0x06003ACA | values[0]经conv.i4写GPJFBHCPDAB |
 | NPCHP处理 | 0x06002DAA | 同样从第一值取得Int32生命原值 |
 
-这一调用链能确认首值是 `Int32` HP 原值。其余 `values` 和其他成员的含义还未确认，因此页面只显示原值。HP 变化要在实际场景中观察。
+## 原生 UDP 函数
 
-## 6. 原生 UDP 函数
-
-`libjelib.so` 的 SHA-256 为 `a6e64e050d3ac896bb5310e3bcfc80f8d724188b6db1955e216bb868641526f6`。
+地址为 ELF VA。脚本按 `PT_LOAD` 转成文件偏移。
 
 ```bash
 python3 research/disassemble_native.py --so /path/to/libjelib.so --output work/native
@@ -96,21 +82,4 @@ python3 research/disassemble_native.py --so /path/to/libjelib.so --output work/n
 | msgParse/PushMsg/GetMsg | 应用队列边界 | 何时开始托管应用头，内存复制长度 |
 | GetMsg，固定函数VA0x5c2a0 | 原生到托管取消息 | 消息长度与拷贝边界 |
 
-用 `readelf` 的动态符号找函数。外部调用经过 PLT 时，再查看重定位和符号，确认目标是否为 `Zstd::Decompress` 等函数。
-
-表中地址均为 ELF VA，脚本按 `PT_LOAD` 将其换算为文件偏移。换版本或架构后需要重新定位。
-
-## 7. 记录分析证据
-
-记录输入的 SHA-256 和版本、token 或 VA、完整方法名、读写字段的位置、调用方和使用方、实测消息号及验证范围。
-
-私人研究表可按 `claim → parser → field → consumer → conversion → PCAP event → status` 记录。公开材料保留方法位置和脱敏统计，玩家 UID、姓名、端点、消息原始字节和流量留在本地。
-
-历史 IL 导出、当前 SDK 构建、CSV 核对和游戏内验证各有单独记录。[验证记录](VALIDATION.md)
-
-
-## 8. 上下行传输头的样本验证
-
-成品按下行首片偏移 10、后续片偏移 8、序号偏移 2 解析。真实主会话中，上行应用数据从偏移 14 开始，序号从偏移 6 开始。`pcap_lab.py` 按方向使用这些偏移，并用历史分析脚本和实测的 3/851、3/852 分布核对。上行分片和合包计为未支持，3/851 的完整消息结构仍待确认。
-
-辅助工具第一次用真实样本核对时，下行 852 的数量正确，上行却出现大量分散的 `module/command`。重新区分传输头后，上行结果才与样本吻合。成品的入站解码沿用原实现。
+PLT 调用可用 `readelf` 的重定位和符号表核对。[验证记录](VALIDATION.md)

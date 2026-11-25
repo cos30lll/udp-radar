@@ -2,7 +2,7 @@
 
 ## release-r2 · 2026-11-23
 
-- 加入从零实现和证据阅读两篇文档。
+- 新增[实现教程](FROM_ZERO.md)和[协议分析索引](EVIDENCE_WALKTHROUGH.md)。
 - 加入 `pcap_lab.py` 和 `legacy_move50.py`，用于离线查看消息和读取早期 3/50 样本。
 - 修复 IL2CPP 恢复脚本读取 metadata 报告的问题。
 

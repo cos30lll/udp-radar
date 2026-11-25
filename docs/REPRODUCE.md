@@ -1,10 +1,10 @@
 # 部署与复现
 
-下列命令默认在仓库根目录执行。手机要有 Android Root、`tcpdump`、`ss`、`pidof` 和 `su`，Operit Ubuntu 中要有 Python 3.9 或更新版本和 `libzstd`。
+除另有说明，命令都在仓库根目录执行。手机需要 Root 和系统命令 `tcpdump`、`ss`、`pidof`、`su`。Python 3.9+ 和 `libzstd` 装在 Operit Ubuntu 里。
 
 ## A. 手机本地部署
 
-把完整仓库复制到手机共享存储。在手机的 Operit Ubuntu 中运行检查并复制运行文件。路径按实际位置替换。
+把完整仓库复制到手机共享存储。在 Operit Ubuntu 里切换到实际存放仓库的目录，先检查环境、预览部署路径，再用 `--write` 写入文件。
 
 ```sh
 cd '/storage/emulated/0/Download/超自然行动/分享包/udp-radar-open-source-v2.2'
@@ -42,7 +42,7 @@ python3 tools/deploy_android.py --stage build/android-stage --write
 
 ## PCAP 回放
 
-端口改为用 PID 和 `ss` 确认的本机 UDP 端口。输出路径要尚未存在。用 `--events` 导出的 JSONL 只留在本地。
+把 `--ports` 换成当时通过游戏 PID 和 `ss` 确认的本机 UDP 端口。工具会拒绝覆盖已有输出，请给结果取个新文件名。`--events` 导出的 JSONL 含逐条事件，保存在本机即可。
 
 ```sh
 python3 tools/replay_pcap.py /path/to/your.pcap --ports 38516,41003 --summary build/my-summary.json
@@ -68,7 +68,7 @@ dotnet build research/managed/ProtocolEvidenceInspect -c Release
 dotnet build research/managed/StaticReferenceInspect -c Release
 ```
 
-提取热更新程序集、导出 IL、恢复 metadata 或核对输入哈希的命令都在分析教程中。[从零实现 UDP 雷达](FROM_ZERO.md) · [证据索引](EVIDENCE_WALKTHROUGH.md)
+提取热更新程序集、导出 IL、恢复 metadata 和核对输入哈希的步骤见[实现教程](FROM_ZERO.md)。查某条消息对应的解析方法，可用[协议分析索引](EVIDENCE_WALKTHROUGH.md)。
 
 用下面的命令查看应用消息和字段。例子中的端口要换成本机实际端口。
 

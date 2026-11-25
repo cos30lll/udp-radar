@@ -1,6 +1,6 @@
 # 从零实现 UDP 雷达
 
-从热更新程序集和原生 UDP 库找到消息解析器，再用测试 PCAP 核对坐标、姓名和 HP。文中的哈希、偏移和消息号对应固定版本。已有成品可直接看[部署指南](REPRODUCE.md)。
+雷达从哪条消息里读到实体坐标？先在热更新程序集和原生 UDP 库里找解析器，再用抓包回放核对坐标、姓名和 HP。文中的哈希、偏移和消息号取自游戏版本 `1.35.20.001`。要在手机上运行雷达，直接看[部署指南](REPRODUCE.md)。
 
 ## 1. 工作目录和依赖
 
@@ -112,7 +112,7 @@ IPv4 用 IHL、总长度和协议号定位 UDP，IPv6 目前只处理直接 UDP�
 python3 research/disassemble_native.py --so work/apk/lib/arm64-v8a/libjelib.so --output work/native
 ```
 
-沿 `RecvLoop`、`udpParse`、`msgParse` 查看头字段、重组、解压和入队，再用 `AsyncSend` 核对发送端的写入。压缩分支调用 `Zstd::Decompress`。下行校验使用单片长度、flag 及序号的两个字节。[证据索引](EVIDENCE_WALKTHROUGH.md)
+沿 `RecvLoop`、`udpParse`、`msgParse` 查看头字段、重组、解压和入队，再用 `AsyncSend` 核对发送端的写入。压缩分支调用 `Zstd::Decompress`。下行校验使用单片长度、flag 及序号的两个字节。[方法索引](EVIDENCE_WALKTHROUGH.md)
 
 ```python
 valid = data[0] == ((len(data) + data[1] + data[2] + data[3]) & 0xff)
@@ -237,7 +237,7 @@ HP 和位置可能先后到达，后端单独保存 HP 原值和时间戳。
 
 ## 11. 接入后端和网页
 
-实时读取和端口确认后的补解析都消费 `feed_many` 返回的全部事件。
+无论是实时读包，还是在确认端口后补读缓存，都要处理 `feed_many` 返回的每一条事件。
 
 ```python
 for timestamp, packet, link, frame in reader.poll():
@@ -245,7 +245,7 @@ for timestamp, packet, link, frame in reader.poll():
         state.apply(event)
 ```
 
-按 `local_port@peer` 区分流，再加 `category/id1/id2` 组成实体键。身份和场景分别检查序号，16 位回绕用 `(new-old)&65535`，超过 32767 当作旧序号。游戏进程换代以及收到 3/1 时清理相关状态，旧进程的缓存用开始时间过滤。
+按 `local_port@peer` 区分流，再加 `category/id1/id2` 组成实体键。身份和场景分别检查序号，用 `(new-old)&65535` 处理 16 位序号回绕，结果超过 32767 就视为旧序号。游戏进程重启或收到 3/1 时，后端清理相关状态，按进程开始时间过滤旧缓存。
 
 Android 先启动持续抓包，再运行 proot 后端。`ss` 每秒刷新端口归属，端口确认后补解析缓存里的记录，避免重启抓包时漏掉进场名单。进程、状态和日志的细节见[架构说明](ARCHITECTURE.md)。
 
@@ -265,7 +265,7 @@ screen_y = H/2 + sign * (world_z - center_z) * pixels_per_unit
 
 ## 13. 发布
 
-发布前检查分发目录和发布清单。原始样本、游戏文件和会话日志留在本地。[发布清单](PUBLISH_CHECKLIST.md)
+核对 `src/` 与 `dist/` 的内容，再检查文件清单。原始样本、游戏文件和会话日志留在本地。[发布清单](PUBLISH_CHECKLIST.md)
 
 ```bash
 python3 tools/build_dist.py --check

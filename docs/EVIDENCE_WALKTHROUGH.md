@@ -1,6 +1,6 @@
-# UDP 协议分析的证据索引
+# UDP 消息与解析方法索引
 
-托管 token 对应 `UpdateScript_500.dll`，原生 VA 对应 `libjelib.so`。输入哈希、提取和回放命令见[实现教程](FROM_ZERO.md)。
+这里按消息列出样本里对应的方法。表中的 token 来自 `UpdateScript_500.dll`，原生虚拟地址（VA）来自 `libjelib.so`。样本的 SHA-256 和回放命令见[实现教程](FROM_ZERO.md)。
 
 ## 托管工具
 
@@ -10,7 +10,7 @@
 
 ## 网络入口和 3/50
 
-| 问题 | token/类型 | 阅读目标 |
+| 功能 | token / 类型 | 方法里可以看到什么 |
 |---|---|---|
 | 传输模式选择 | 0x06012A84；DHPODGOMOID | 分支实际选择了哪个传输实现 |
 | 应用头与批量移动分派 | 0x0601F599；NLJGAHGAAEH | 何处读取module/command，何处进入body解析 |
@@ -26,7 +26,7 @@
 
 ## 3/852 场景解析
 
-| 层级 | token | 类型/证据点 |
+| 层级 | token | 对应类型和行为 |
 |---|---|---|
 | 场景handler | 0x06016A77 | FMPDBDEEKGC::MMMFDMBPCAO(BILKNBOMFCO,Int32)，遍历/删除如何进入业务 |
 | 场景parser | 0x06026483 | BILKNBOMFCO，field6反复调用实体parser，field7移除ID |
@@ -40,7 +40,7 @@
 
 ## 名单和本地身份
 
-| 目的 | token | 应证明的关系 |
+| 功能 | token | 字段和调用关系 |
 |---|---|---|
 | 姓名UI入口 | 0x0600EE78 | CzrPlayerNameUI::SetInitData的字符串、UID、实体号来源 |
 | 姓名getter消费 | 0x060038F2 | 角色显示链读取哪个getter |
@@ -59,7 +59,7 @@
 
 ## HP
 
-| 目的 | token | 应读到的事实 |
+| 方法 | token | HP 的读取和写入 |
 |---|---|---|
 | 玩家动作分派 | 0x060038F8 | kind31进入对应生命处理 |
 | 玩家HP处理 | 0x06003ACA | values[0]经conv.i4写GPJFBHCPDAB |

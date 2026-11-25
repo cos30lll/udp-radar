@@ -1,4 +1,4 @@
-# UDP Radar
+# UDP Radar  [ECAPI 中转站](https://ecmod.zhake.win)的许愿编程生成
 
 UDP Radar 读取游戏发到 Android 手机上的 UDP 数据，在本机浏览器里画出实体位置和轨迹。收到玩家名单后，页面会显示姓名和 UID，收到血量更新时会显示最近一次的 HP。
 
